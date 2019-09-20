@@ -60,6 +60,7 @@ def split(clause_list):
     ll = random.choice(clause_list)
     if len(ll) != 0:
         knownn_numbers[ll[random.randint(0,len(ll)-1)]] = 1
+        split_choices.add(ll[random.randint(0,len(ll)-1)])
 #
 def remove_negative_from_output(output):
     x = set()
@@ -89,6 +90,9 @@ def check_for_conlict_in_known_numbers(known_numbers, verbose = 0):
 def action_if_conflict(state):
     pass
 
+def reverse_truth_value(literal):
+    return literal * -1
+
 
 def check():
     print(clause_list)
@@ -109,14 +113,20 @@ while state != "SATISFIED":
     davis_putnam(clause_list,knownn_numbers)
     x = len(clause_list)
     davis_putnam(clause_list,knownn_numbers)
-    check()
+    #check()
     x1 = len(clause_list)
     if x1 == x and len(clause_list) != 0:
         split(clause_list)
 
-print(list_copies)
-
+#print(list_copies)
 print(len(list_copies))
+print(list_copies[len(list_copies)-2])
+last_pick = list(knownn_numbers)[-1]
+print(last_pick)
+
+#index
+
+# print(knownn_numbers)
 
 
 # def process_known_clauses(clause_list, known_numbers):
