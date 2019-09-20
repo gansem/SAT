@@ -1,0 +1,135 @@
+import mxklabs.dimacs
+import random
+
+a = r"C:\Users\QX209\PycharmProjects\untitled1\2x2 sudoki\sudoku-rules.txt"
+b = r"C:\Users\QX209\PycharmProjects\untitled1\2x2 sudoki\sudoku-example.txt"
+dimacs = mxklabs.dimacs.read(a)
+rules = list(dimacs.clauses)
+dimacs1 = mxklabs.dimacs.read(b)
+example = list(dimacs1.clauses)
+clause_list = rules + example
+knownn_numbers = dictOfWords = { i[0] : 1 for i in example }
+split_choices = set()
+state = 'satisfying'
+
+def remove_unit_clauses(clause_list):
+    removed = []
+    for clause in clause_list:
+        if len(clause) == 1:
+            print(clause)
+            removed.append(clause)
+            clause_list.remove(clause)
+    return removed
+
+def check_if_satisfied(clause_list):
+    state = "not satisfied yet"
+    if len(clause_list) == 0:
+        state = "SATISFIED"
+        return state
+    return state
+
+def check_for_empty_clause(clause_list):
+    #state = "no empty clauses"
+    for clause in clause_list:
+        if len(clause) == 0:
+            #state = "EMPTY CLAUSE FOUND"
+            return True
+
+
+
+def dictionary_processing(clause_list,dictionary,verbose = 0):
+    for key in dictionary:
+        minus_key = -key
+        # if verbose = 1:
+        #     print(minus_key)
+        for clause in clause_list[:]:
+            if key in clause:
+                clause_list.remove(clause)
+                # continue
+            if minus_key in clause:
+                clause.remove(minus_key)
+
+def remove_unit_clauses_eindelijk_goed(clause_list, dictionary):
+    for clause in clause_list[:]:
+        if len(clause) == 1:
+            dictionary[clause[0]] = 1
+            clause_list.remove(clause)
+
+def split(clause_list):
+    ll = random.choice(clause_list)
+    if len(ll) != 0:
+        knownn_numbers[ll[random.randint(0,len(ll)-1)]] = 1
+#
+def remove_negative_from_output(output):
+    x = set()
+    for element in output:
+        if element > 0:
+            x.add(element)
+    y = sorted(list(x))
+    return y
+#
+def davis_putnam(clause_list, known_numbers):
+    dictionary_processing(clause_list,known_numbers)
+    remove_unit_clauses_eindelijk_goed(clause_list,known_numbers)
+
+def check_for_conlict_in_known_numbers(known_numbers, verbose = 0):
+    if verbose == 1:
+        print(known_numbers)
+        print(type(known_numbers))
+    state = "satisfying"
+    for i in known_numbers:
+        if verbose == 1:
+            print(type(i))
+        if -i in known_numbers:
+            state = "conflict"
+            return state
+    return state
+#
+def action_if_conflict(state):
+    pass
+
+
+def check():
+    print(clause_list)
+    print(knownn_numbers)
+    print(len(clause_list))
+
+def back_track(clause_list):
+    if check_for_empty_clause(clause_list):
+        pass
+
+while state != "SATISFIED":
+    if check_for_empty_clause(clause_list):
+        print("empty clause found")
+        break
+    state = check_if_satisfied(clause_list)
+    davis_putnam(clause_list,knownn_numbers)
+    print(state)
+    x = len(clause_list)
+    davis_putnam(clause_list,knownn_numbers)
+    check()
+    x1 = len(clause_list)
+    if x1 == x and len(clause_list) != 0:
+        split(clause_list)
+
+print(len(clause_list))
+
+
+# def process_known_clauses(clause_list, known_numbers):
+#     for clause in clause_list:
+#         # if check_if_list(clause):
+#         #     clause = [clause]
+#         # als clause length 1 heeft is die waar
+#         if len(clause) == 1:
+#             known_numbers.add(clause[0])
+#             x = clause[0]
+#             opposite_literal = x * - 1
+#             #print(opposite_literal)
+#             for clause in clause_list:
+#                 # if check_if_list(clause):
+#                 #     clause = [clause]
+#                 if len(clause) > 1:
+#                     for literal in clause:
+#                         if literal == x or literal == opposite_literal:
+#                          clause.remove(literal)
+#
