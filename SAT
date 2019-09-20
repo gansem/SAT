@@ -1,5 +1,6 @@
 import mxklabs.dimacs
 import random
+import copy
 
 a = r"C:\Users\QX209\PycharmProjects\untitled1\2x2 sudoki\sudoku-rules.txt"
 b = r"C:\Users\QX209\PycharmProjects\untitled1\2x2 sudoki\sudoku-example.txt"
@@ -98,13 +99,14 @@ def back_track(clause_list):
     if check_for_empty_clause(clause_list):
         pass
 
+list_copies = []
 while state != "SATISFIED":
+    list_copies.append(copy.deepcopy(clause_list))
     if check_for_empty_clause(clause_list):
         print("empty clause found")
         break
     state = check_if_satisfied(clause_list)
     davis_putnam(clause_list,knownn_numbers)
-    print(state)
     x = len(clause_list)
     davis_putnam(clause_list,knownn_numbers)
     check()
@@ -112,7 +114,9 @@ while state != "SATISFIED":
     if x1 == x and len(clause_list) != 0:
         split(clause_list)
 
-print(len(clause_list))
+print(list_copies)
+
+print(len(list_copies))
 
 
 # def process_known_clauses(clause_list, known_numbers):
