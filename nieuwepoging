@@ -1,0 +1,133 @@
+import copy
+import random
+
+clause_list = [[111,333,777], [-111,-444], [-555,-666], [444], [-777,777]]
+a = -111
+literals = set()
+literals.add(a)
+literals_true = list()
+#print(literals)
+deepcopy_container = []
+
+
+
+def remove_tautologies():
+    pass
+
+def remove_pure_literals():
+    pass
+
+def davis_putnam(literals_to_process, clauses):
+
+    def remove_unit_clauses(clauses):
+        unit_clause_list = []
+        for clause in clauses[:]:
+            if len(clause) == 1:
+                unit_clause_list.append(clause)
+        for unit_clause in unit_clause_list:
+            if unit_clause in unit_clause_list and -unit_clause[0] in unit_clause_list:
+                
+                # print(clause[0])
+                # print(literals_true)
+                if clause[0] and -clause[0] not in literals_true:
+                    literals_to_process.add(clause[0])
+                    literals_true.append(clause[0])
+                    clauses.remove(clause)
+                elif clause[0] or -clause[0] in literals_true:
+                    # probeer opnieuw met reverse truth_value
+                    # met clause voor
+                    print("contradiction")
+                    return False
+            return True
+
+    def process_literals(literals_to_process, clauses):
+        for literal in literals_to_process.copy():
+            # print(clauses)
+            literal = literal
+            opposite_literal = -literal
+            variable = abs(literal)
+            literal_and_variable_are_the_same = literal == variable
+            for clause in clauses[:]:
+                if literal_and_variable_are_the_same:
+                    # print(clause)
+                    if literal in clause:
+                        clauses.remove(clause)
+                    if -literal in clause:
+                        clause.remove(-literal)
+                if not literal_and_variable_are_the_same:
+                    if literal in clause:
+                        clause.remove(literal)
+                    if -literal in clause:
+                        clause.remove(opposite_literal)
+
+    def split(clauses):
+        a = copy.deepcopy(clauses)
+        deepcopy_container.append(a)
+        split_choice = [clauses[0][0]]
+        return split_choice
+
+    process_literals(literals,clauses)
+    remove_unit_clauses(clauses)
+
+    #
+    #
+    # if remove_unit_clauses(clauses) and len(clauses) != 0:
+    #     literals_to_process.add(split(clauses))
+    #
+    # if not remove_unit_clauses(clauses):
+    #     literals
+
+
+    x = split(clauses)
+    return x
+
+y = davis_putnam(literals,clause_list)
+print(y)
+
+
+# def remove_unit_clauses(clauses):
+#     for clause in clauses[:]:
+#         if len(clause) == 1:
+#             #print(clause[0])
+#             #print(literals_true)
+#             if clause[0] and -clause[0] not in literals_true:
+#                 literals_true.append(clause[0])
+#                 clauses.remove(clause)
+#             elif clause[0] or -clause[0] in literals_true:
+#                 #probeer opnieuw met reverse truth_value
+#                 # met clause voor
+#
+#                 print("contradiction")
+#                 return False
+#         # return True
+#
+# def process_literals(literals_to_process,clauses):
+#     for literal in literals_to_process.copy():
+#             #print(clauses)
+#         literal = literal
+#         opposite_literal = -literal
+#         variable = abs(literal)
+#         literal_and_variable_are_the_same = literal == variable
+#         for clause in clauses[:]:
+#             if literal_and_variable_are_the_same:
+#                         #print(clause)
+#                     if literal in clause:
+#                         clauses.remove(clause)
+#                     if -literal in clause:
+#                         clause.remove(-literal)
+#             if not literal_and_variable_are_the_same:
+#                     if literal in clause:
+#                         clause.remove(literal)
+#                     if -literal in clause:
+#                         clause.remove(opposite_literal)
+
+
+
+# process_literals(literals,clause_list)
+# print(clause_list)
+# remove_unit_clauses(clause_list)
+# print(literals_true)
+
+# print(clause_list)
+
+#print(clause_list)
