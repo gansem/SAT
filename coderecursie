@@ -1,0 +1,109 @@
+import mxklabs.dimacs
+import random
+import copy
+
+a = r"C:\Users\QX209\PycharmProjects\untitled1\2x2 sudoki\sudoku-rules1.txt"
+b = r"C:\Users\QX209\PycharmProjects\untitled1\2x2 sudoki\sudoku-example1.txt"
+dimacs = mxklabs.dimacs.read(a)
+rules = list(dimacs.clauses)
+dimacs1 = mxklabs.dimacs.read(b)
+example = list(dimacs1.clauses)
+clause_list = rules + example
+known_numbers_dictionary = dictOfWords = { i[0] : True for i in example }
+literals_to_process = set(known_numbers_dictionary)
+processed_literals = set(known_numbers_dictionary)
+deep_copy_clause_list = []
+number_of_iterations = 0
+
+def davis_putnam(clause_list, literal_set, call_split = False, split_choices = []):
+    deep_copy_clause_list.append(clause_list)
+    def add_to_dictionary(literal):
+        x = literal
+        variable = abs(literal)
+        equal = x == variable
+        # if variable not in known_numbers_dictionary:
+        if equal:
+            known_numbers_dictionary[variable] = True
+        else:
+                #print("DOESEXIST")
+            known_numbers_dictionary[variable] = False
+        return known_numbers_dictionary
+
+    def splitt(clause_list):
+        if len(clause_list) == 0:
+            return
+        if len(clause_list) >= 1:
+            ll = random.choice(clause_list)
+            if len(ll) != 0:
+                add_to_dictionary(ll[0])
+                literal_set.add(ll[0])
+
+    def check_still_clauses_to_solve(clause_list):
+        return len(clause_list) == 0
+
+    def check_for_empty_clauses(clause_list):
+        for clause in clause_list[:]:
+            if len(clause) == 0:
+                return False
+        return True
+
+    def process_literal(clause_list, literal, verbose=0):
+        literal = literal
+        variable = abs(literal)
+        opposite_literal = variable * -1
+
+        if literal == variable:
+            for clause in clause_list[:]:
+                if variable in clause:
+                    clause_list.remove(clause)
+                if opposite_literal in clause:
+                    clause.remove(opposite_literal)
+
+        elif literal != variable:
+            for clause in clause_list[:]:
+                if variable in clause:
+                    clause.remove(variable)
+                if literal in clause:
+                    clause_list.remove(clause)
+
+    def resolve(clause_list, literal_set):
+        for literal in literal_set.copy():
+            processed_literals.add(literal)
+            deep_copy_clause_list.append(clause_list)
+            process_literal(clause_list, literal)
+            remove_unit_clauses_eindelijk_goed(clause_list)
+            literal_set.remove(literal)
+        return clause_list
+
+    def remove_unit_clauses_eindelijk_goed(clause_list):
+        for clause in clause_list[:]:
+            if len(clause) == 1:
+                add_to_dictionary(clause[0])
+                clause_list.remove(clause)
+
+    def remove_false_from_dictionary():
+        a = list()
+        for key, value in known_numbers_dictionary.items():
+
+            if value == True:
+                a.append(key)
+        return sorted(a)
+
+    #PROGRAM START
+    if check_still_clauses_to_solve(clause_list):
+        # end recursion if no more clauses to solve
+        return
+
+    elif len(clause_list) != 0:
+        if check_for_empty_clauses(clause_list):
+
+            clause_list = resolve(clause_list,literal_set)
+            splitt(clause_list)
+            davis_putnam(clause_list,literals_to_process)
+            #print(known_numbers_dictionary)
+    x = remove_false_from_dictionary()
+    return x
+
+yy = davis_putnam(clause_list,literals_to_process)
+print(clause_list)
+print(yy)
