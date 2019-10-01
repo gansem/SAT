@@ -1,8 +1,8 @@
 import copy
 from typing import List
-from collections import Counter
 import itertools
 import mxklabs.dimacs
+
 
 
 def simplify(_clause_list: List[List[int]], _known_numbers: List[List[int]]):
@@ -33,10 +33,12 @@ def remove_unit_clause(_clause_list, _known_numbers):
         else:
             _known_numbers.append(unit_clause)
 
-
-def moms_heuristic(_clause_list):
+def moms_heuristic(_clause_list, _remaining_literals):
     smallest_len = 1000
+    max_mom = 0
     list_small_clauses = []
+    k = 2
+    chosen_literal = None
     for clause in _clause_list:
         if len(clause) < smallest_len:
             smallest_len = len(clause)
@@ -46,40 +48,39 @@ def moms_heuristic(_clause_list):
             list_small_clauses.append(clause)
 
     merged = list(itertools.chain(*list_small_clauses))
+    x = len(_remaining_literals)
 
-    print(type(merged))
+    for i in _remaining_literals:
+        pos_occurrence = merged.count(i)
+        neg_occurrence = merged.count(-i)
+        mom_value = (pos_occurrence + neg_occurrence) * 2 ** k + (pos_occurrence * neg_occurrence)
+        if mom_value > max_mom:
+            max_mom = mom_value
+            chosen_literal = i
 
-    occurrences = Counter(merged)
-
-    # x = occurrences.keys()
-    # print(x)
-    # y = list(x)
-    # print(occurrences)
-    # print(y[0])
-    # return list(occurrences)[0]
+    print(chosen_literal)
+    return chosen_literal
 
 
 def split(_clause_list, _known_numbers):
     remaining_literals = set()
     for clause in _clause_list:
         for literal in clause:
-            remaining_literals.add(literal)
+            remaining_literals.add(abs(literal))
+
     print('split')
 
-    x = moms_heuristic(_clause_list)
+    x = moms_heuristic(_clause_list, remaining_literals)
 
     for chosen_number in remaining_literals:
         copy_clause_list = copy.deepcopy(_clause_list)
         copy_known_numbers = copy.deepcopy(_known_numbers)
         copy_known_numbers.append([x])
-        print(x)
         _success, _result = dp(copy_clause_list, copy_known_numbers)
         if _success:
             return _success, _result
     print('contradiction')
     return False, known_numbers
-
-
 
 sudoku_rules = "sudoku-rules.txt"
 sudoku_game = "sudoku-example.txt"
