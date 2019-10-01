@@ -46,11 +46,17 @@ def moms_heuristic(_clause_list):
             list_small_clauses.append(clause)
 
     merged = list(itertools.chain(*list_small_clauses))
-    occurrences = Counter(merged)
-    print (occurrences)
-    print(list(occurrences))
 
-    return list(occurrences)[0]
+    print(type(merged))
+
+    occurrences = Counter(merged)
+
+    # x = occurrences.keys()
+    # print(x)
+    # y = list(x)
+    # print(occurrences)
+    # print(y[0])
+    # return list(occurrences)[0]
 
 
 def split(_clause_list, _known_numbers):
