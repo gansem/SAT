@@ -5,6 +5,7 @@ import glob
 import mxklabs.dimacs
 import time
 import xlsxwriter
+from operator import itemgetter
 
 
 def simplify(_clause_list: List[List[int]], _known_numbers: List[List[int]]):
@@ -39,22 +40,31 @@ def remove_unit_clause(_clause_list, _known_numbers):
 def bohm(_clause_list, _remaining_literals):
     alpha = 1
     beta = 2
-    max_value = 0
-    max_literal = None
-    for i in range(1,len(max(_clause_list))):
-        same_len_list = list()
+    max_value = -100000000
+    chosen_literal = None
+    same_len_list = list()
+
+    for i in range(1, len(max(clause_list, key=lambda coll: len(coll))) +1):
         for clause in _clause_list:
             if len(clause) == i:
                 same_len_list.append(clause)
-        merged = list(itertools.chain(*same_len_list))
-        for literal in _remaining_literals:
-            pos = merged.count(literal)
-            neg = merged.count(-literal)
-            bohm_formula = alpha * max(pos,neg) + beta * min(pos,neg)
-            if bohm_formula > max_value:
-                max_value = bohm_formula
-                max_literal = literal
-    return max_literal
+
+    merged = list(itertools.chain(*same_len_list))
+    outer_list = []
+
+    for literal in _remaining_literals:
+        inner_list = []
+        pos = merged.count(literal)
+        neg = merged.count(-literal)
+        bohm_formula = alpha * max(pos, neg) + beta * min(pos, neg)
+        inner_list.append(bohm_formula)
+        inner_list.append(literal)
+        outer_list.append(inner_list)
+
+    sorted_matrix = sorted(outer_list, key=itemgetter(0))
+    sorted_list = list(itertools.chain(*sorted_matrix))
+
+    return sorted_list
 
 
 def split(_clause_list, _known_numbers):
@@ -66,9 +76,9 @@ def split(_clause_list, _known_numbers):
     global split_counter
     split_counter += 1
 
-    bohm(_clause_list, remaining_literals)
+    bohm_list = bohm(_clause_list, remaining_literals)
 
-    for chosen_number in remaining_literals:
+    for chosen_number in bohm_list[1::2]:
         copy_clause_list = copy.deepcopy(_clause_list)
         copy_known_numbers = copy.deepcopy(_known_numbers)
         copy_known_numbers.append([chosen_number])
@@ -95,7 +105,7 @@ def dp(_clause_list: List[List[int]], _known_numbers: List[List[int]]) -> (bool,
     global num_quits
     if time.time() > start + 60:
         num_quits += 1
-        exit()
+        return True, 0
 
     while True:
         clause_len = len(_clause_list)
@@ -106,13 +116,12 @@ def dp(_clause_list: List[List[int]], _known_numbers: List[List[int]]) -> (bool,
             break
     if len(_clause_list) != 0:
         return split(_clause_list, _known_numbers)
-    print(split_counter,backtrack_counter)
     return True, _known_numbers
 
 
 sudoku_rules = "sudoku-rules.txt"
 sudoku_folder = r"C:\Users\Guido\PycharmProjects\untitled\SAT\other sudokus\sudokusindimacs\*.cnf"
-workbook = xlsxwriter.Workbook('sudoko data BOHM 2.xlsx')
+workbook = xlsxwriter.Workbook('sudoko data BOHM.xlsx')
 worksheet = workbook.add_worksheet('sheet 1')
 worksheet.write(0, 0, 'number of givens')
 worksheet.write(0, 2, 'number of backtracks')
@@ -133,6 +142,7 @@ for sudoku in glob.glob(sudoku_folder):
     known_numbers = mxklabs.dimacs.read(sudoku).clauses
     num_givens = len(known_numbers)
     success, result = dp(clause_list, known_numbers)
+    if result == 0: continue
     prettify(result)
     worksheet.write(row + 1, 0, num_givens)
     worksheet.write(row + 1, 2, backtrack_counter)
